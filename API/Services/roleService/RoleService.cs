@@ -26,7 +26,7 @@ namespace API.Services.roleService
             
             var result = new RolesOut
             {
-                Id = role.Id,
+                Rolesid = role.RolesId,
                 Rolename = role.RoleName
             };
 
@@ -39,7 +39,7 @@ namespace API.Services.roleService
             if(roles.Count == 0) return new AppResponse<List<RolesOut>>(null,"Roles not found",404,false);
 
             var result = roles.Select(r => new RolesOut{
-                Id = r.Id,
+                Rolesid = r.RolesId,
                 Rolename = r.RoleName
             }).ToList();
 
@@ -53,7 +53,7 @@ namespace API.Services.roleService
             if(role == null) return new AppResponse<RolesOut>(null, "Role doesnt exist", 404, false);
             var result = new RolesOut
             {
-                Id = role.Id,
+                Rolesid = role.RolesId,
                 Rolename = role.RoleName
             };
             return new AppResponse<RolesOut>(result);
@@ -61,15 +61,15 @@ namespace API.Services.roleService
 
         public async Task<AppResponse<RoleDeleteOut>> RemoveRole(RoleDeleteIn role)
         {
-            var removedRole = await UnitOfWork.RolesRepository.GetRoleById(role.Id);
+            var removedRole = await UnitOfWork.RolesRepository.GetRoleById(role.Roleid);
             if(removedRole == null) return new AppResponse<RoleDeleteOut>(null, "Cant remove, Role not found or doesnt exist",404,false);
 
-            await UnitOfWork.RolesRepository.DeleteRole(removedRole.Id);
+            await UnitOfWork.RolesRepository.DeleteRole(removedRole.RolesId);
             await UnitOfWork.Complete();
 
             var result = new RoleDeleteOut
             {
-                Id = removedRole.Id,
+                Rolesid = removedRole.RolesId,
                 Rolename = removedRole.RoleName
             };
 
@@ -88,7 +88,7 @@ namespace API.Services.roleService
 
             var result = new RolesOut
             {
-                Id = role.Id,
+                Rolesid = role.RolesId,
                 Rolename = role.RoleName
             };
 

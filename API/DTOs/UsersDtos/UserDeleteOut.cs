@@ -7,7 +7,7 @@ namespace API.DTOs.UsersDtos
 {
     public class UserDeleteOut
     {
-        public int Id{ get; set; }
+        public int Userid{ get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
     }

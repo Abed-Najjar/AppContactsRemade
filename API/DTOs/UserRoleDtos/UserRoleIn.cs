@@ -6,7 +6,7 @@ namespace API.DTOs.UserRoleDtos;
 public class UserRoleIn
 {   
     [Required]
-    public int Id { get; set; }
+    public int UserId { get; set; }
     public required string Username { get; set; }
     [Required]
     public required string PasswordHash { get; set; }

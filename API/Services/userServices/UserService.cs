@@ -29,7 +29,7 @@ namespace API.Services.userServices
 
             var result = new UsersOut
             {
-                Id = user.Id,
+                Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email,
                 Passwordhash = user.PasswordHash
@@ -45,7 +45,7 @@ namespace API.Services.userServices
 
             var resultDto = users.Select(u => new UsersOut
             {
-                Id = u.Id,
+                Userid = u.UserId,
                 Username = u.UserName,
                 Email = u.Email!,
                 Passwordhash = u.PasswordHash
@@ -61,7 +61,7 @@ namespace API.Services.userServices
 
             var result = new UsersOut
             {
-                Id = user.Id,
+                Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email!,
                 Passwordhash = user.PasswordHash
@@ -78,7 +78,7 @@ namespace API.Services.userServices
             if(user == null) return new AppResponse<UsersOut>(null, "Cant get by name, Username not found", 404,false);
 
             var result = new UsersOut{
-                Id = user.Id,
+                Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email!,
                 Passwordhash = user.PasswordHash
@@ -92,12 +92,12 @@ namespace API.Services.userServices
             var user = await UnitOfWork.UserRepository.GetUserByIdRepository(userIn.Id);
             if(user == null) return new AppResponse<UserDeleteOut>(null, "Cant remove, User not found",404,false);
 
-            await UnitOfWork.UserRepository.DeleteUserRepository(user.Id);
+            await UnitOfWork.UserRepository.DeleteUserRepository(user.UserId);
             await UnitOfWork.Complete();
 
             var result = new UserDeleteOut
             {
-                Id = user.Id,
+                Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email!
             };
@@ -119,7 +119,7 @@ namespace API.Services.userServices
 
             var result = new UsersOut
             {
-                Id = user.Id,
+                Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email,
                 Passwordhash = user.PasswordHash

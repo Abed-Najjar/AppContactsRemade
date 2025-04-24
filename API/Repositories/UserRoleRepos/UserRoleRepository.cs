@@ -44,17 +44,22 @@ public class UserRoleRepository(AppDbContext context) : IUserRoleRepository
 
     public async Task<UsersRoles> UpdateUsersRolesRepository(UsersRoles updatedUsersRolesDetails)
     {
-        var user = await _context.UsersRoles
-                                 .Where(ur => ur.UserId == updatedUsersRolesDetails.UserId && ur.RoleId == updatedUsersRolesDetails.RoleId)
-                                 .FirstOrDefaultAsync();
+        var existingUserRole = await _context.UsersRoles
+                                    .Include(ur => ur.User)
+                                    .Include(ur => ur.Role)
+                                    .FirstOrDefaultAsync(ur => ur.UserId == updatedUsersRolesDetails.UserId 
+                                                      && ur.RoleId == updatedUsersRolesDetails.RoleId);
 
-        if (user == null)
-            throw new Exception("UserRole entry not found.");
+        if (existingUserRole == null)
+            throw new Exception("UserEntry is not found");
 
-        user.Role = updatedUsersRolesDetails.Role;
-        user.User = updatedUsersRolesDetails.User;
+        // Optionally update navigation properties if needed
+        existingUserRole.UserId = updatedUsersRolesDetails.UserId;
+        existingUserRole.RoleId = updatedUsersRolesDetails.RoleId;
 
-        return user;
+        _context.UsersRoles.Update(existingUserRole);
+        return existingUserRole;
     }
+
 
 }

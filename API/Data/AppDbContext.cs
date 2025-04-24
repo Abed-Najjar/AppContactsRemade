@@ -16,6 +16,9 @@ namespace API.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Users>().HasKey(u => u.UserId);
+            builder.Entity<Roles>().HasKey(r => r.RolesId);
+
             // Composite key configuration
             builder.Entity<UsersRoles>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });

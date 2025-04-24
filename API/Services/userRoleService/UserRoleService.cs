@@ -44,38 +44,47 @@ public async Task<AppResponse<UsersRolesOut>> AddUserRoleService(UserRoleIn user
     return new AppResponse<UsersRolesOut>(result);
 }
 
+public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleIn updatedUserRoleDetails)
+{
+    if (updatedUserRoleDetails is null)
+        return new(null, "Update details inputs are empty", 400, false);
 
-    public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleIn updatedUserRoleDetails)
+    var role = await _unitOfWork.RolesRepository.GetRoleById(updatedUserRoleDetails.RoleId);
+    if (role == null)
+        return new(null, "Invalid role", 404, false);
+
+    var user = await _unitOfWork.UserRepository.GetUserByIdRepository(updatedUserRoleDetails.UserId);
+    if (user == null)
+        return new(null, "Invalid user", 404, false);
+
+    // Update user fields
+    user.UserName = updatedUserRoleDetails.Username;
+    user.PasswordHash = updatedUserRoleDetails.PasswordHash;
+
+    // Update relationship
+    var updated = new UsersRoles
     {
-        if (updatedUserRoleDetails is null)
-            return new(null, "Update details inputs are empty", 400, false);
+        UserId = user.UserId,
+        User = user,
+        RoleId = role.RolesId,
+        Role = role,
+    };
 
-        var updated = new UsersRoles
-        {
-            UserId = updatedUserRoleDetails.Id,
-            User = new Users
-            {
-                UserName = updatedUserRoleDetails.Username,
-                PasswordHash = updatedUserRoleDetails.PasswordHash
-            },
-            Role = new Roles 
-            {
-                Id = updatedUserRoleDetails.RoleId 
-            }
-        };
+    // Save updates
+    await _unitOfWork.UserRoleRepository.UpdateUsersRolesRepository(updated);
+    await _unitOfWork.Complete();
 
-        await _unitOfWork.UserRoleRepository.UpdateUsersRolesRepository(updated);
-        await _unitOfWork.Complete();
+    return new(new UsersRolesOut
+    {
+        UserId = user.UserId,
+        Username = user.UserName,
+        PasswordHash = user.PasswordHash,
+        RoleId = role.RolesId,
+        RoleName = role.RoleName
+    });
+}
 
-        return new(new UsersRolesOut
-        {
-            UserId = updated.UserId,
-            Username = updated.User.UserName,
-            PasswordHash = updated.User.PasswordHash,
-            RoleId = updated.RoleId,
-            RoleName = updated.Role.RoleName
-        });
-    }
+
 
     public async Task<AppResponse<UserRoleDeleteOut>> DeleteUserRoleService(UserRoleDeleteIn userRole)
     {
