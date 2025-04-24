@@ -1,6 +1,5 @@
 using API.Data;
 using API.Models;
-using API.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories.RolesRepos

@@ -44,14 +44,17 @@ public class UserRoleRepository(AppDbContext context) : IUserRoleRepository
 
     public async Task<UsersRoles> UpdateUsersRolesRepository(UsersRoles updatedUsersRolesDetails)
     {
-        var user = await _context.UsersRoles.FindAsync(updatedUsersRolesDetails.UserId);
+        var user = await _context.UsersRoles
+                                 .Where(ur => ur.UserId == updatedUsersRolesDetails.UserId && ur.RoleId == updatedUsersRolesDetails.RoleId)
+                                 .FirstOrDefaultAsync();
 
-        user!.RoleId = updatedUsersRolesDetails.RoleId;
-        user!.Role = updatedUsersRolesDetails.Role;
-        user!.UserId = updatedUsersRolesDetails.UserId;
-        user!.User = updatedUsersRolesDetails.User;
+        if (user == null)
+            throw new Exception("UserRole entry not found.");
 
-        _context.UsersRoles.Update(user);
+        user.Role = updatedUsersRolesDetails.Role;
+        user.User = updatedUsersRolesDetails.User;
+
         return user;
     }
+
 }
