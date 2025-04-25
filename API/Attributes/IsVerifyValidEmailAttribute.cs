@@ -1,25 +1,25 @@
-// using System.ComponentModel.DataAnnotations;
-// using API.UoW;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
-// namespace API.Attributes;
+public class IsValidEmailAddress : ValidationAttribute
+{
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        var email = value as string;
 
-// public class IsVerifyValidEmailAttribute : ValidationAttribute
-// {
-//     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-//     {
-//         var email = value as string;
-//         if(email == null)
-//             return new ValidationResult("Email is Required");
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return new ValidationResult("Email is required.");
+        }
 
-//         if(!email.Contains("@technzone.com"))
-//             return new ValidationResult("Email format is invalid");
+        var isValidFormat = Regex.IsMatch(email,
+            @"^[^@\s]+@technzone\.com$", RegexOptions.IgnoreCase);
 
-//         var unitOfWork = (IUnitOfWork)validationContext.GetService(typeof(IUnitOfWork));
-//         var existingUser = unitOfWork.UserRepository.GetByEmail(email);
+        if (!isValidFormat)
+        {
+            return new ValidationResult("Email must be in the format *@technzone.com");
+        }
 
-//         if(existingUser != null)
-//             return new ValidationResult("Email is already in use");
-
-//         return ValidationResult.Success;
-//     }
-// }
+        return ValidationResult.Success;
+    }
+}

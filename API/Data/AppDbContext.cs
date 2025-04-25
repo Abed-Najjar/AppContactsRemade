@@ -16,10 +16,11 @@ namespace API.Data
         {
             base.OnModelCreating(builder);
 
+            // Define primary keys
             builder.Entity<Users>().HasKey(u => u.UserId);
             builder.Entity<Roles>().HasKey(r => r.RolesId);
 
-            // Composite key configuration
+            // Composite primary key for UserRole
             builder.Entity<UsersRoles>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
 
@@ -27,13 +28,15 @@ namespace API.Data
             builder.Entity<UsersRoles>()
                 .HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship: Role → UserRole
             builder.Entity<UsersRoles>()
                 .HasOne(ur => ur.Role)
                 .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId);
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

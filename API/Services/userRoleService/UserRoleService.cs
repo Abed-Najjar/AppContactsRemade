@@ -1,8 +1,7 @@
 using API.DTOs.UserRoleDtos;
-using API.DTOs.UsersDtos;
 using API.Models;
 using API.Response;
-using API.UoW;
+using API.Services.HashingServices;
 
 namespace API.Services.userRoleService;
 
@@ -10,80 +9,80 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-public async Task<AppResponse<UsersRolesOut>> AddUserRoleService(UserRoleIn userRole)
-{
-    if (userRole == null) return new AppResponse<UsersRolesOut>(null, "Your input fields are empty", 404, false);
-
-    // Fetch the existing role from the database
-    var role = await _unitOfWork.RolesRepository.GetRoleById(userRole.RoleId);
-    if (role == null) return new AppResponse<UsersRolesOut>(null, "Role not found", 404, false);
-
-    // Create a new user and assign the existing role
-    var userDetails = new UsersRoles
+    public async Task<AppResponse<UsersRolesOut>> AddUserRoleService(UserRoleIn userRole)
     {
-        User = new Users
+        if (userRole == null) return new AppResponse<UsersRolesOut>(null, "Your input fields are empty", 404, false);
+
+        // Fetch the existing role from the database
+        var role = await _unitOfWork.RolesRepository.GetRoleById(userRole.RoleId);
+        if (role == null) return new AppResponse<UsersRolesOut>(null, "Role not found", 404, false);
+
+        // Create a new user and assign the existing role
+        var userDetails = new UsersRoles
         {
-            UserName = userRole.Username,
-            Email = userRole.Email,
-            PasswordHash = userRole.PasswordHash
-        },
-        Role = role // Assign the existing role directly
-    };
+            User = new Users
+            {
+                UserName = userRole.Username,
+                Email = userRole.Email,
+                PasswordHash = PasswordHasher.HashPassword(userRole.PasswordHash)
+            },
+            
+            RoleId = role.RolesId
+        };
 
-    await _unitOfWork.UserRoleRepository.AddUsersRolesRepository(userDetails);
-    await _unitOfWork.Complete(); // Save changes
+        var createdUserRole = await _unitOfWork.UserRoleRepository.AddUsersRolesRepository(userDetails);
+        await _unitOfWork.Complete(); // Save changes
 
-    var result = new UsersRolesOut
+        var result = new UsersRolesOut
+        {
+            UserId = createdUserRole.UserId,
+            Username = createdUserRole.User.UserName,
+            Email = createdUserRole.User.Email,
+            RoleId = createdUserRole.RoleId,
+            RoleName = createdUserRole.Role.RoleName
+        };
+
+        return new AppResponse<UsersRolesOut>(result);
+    }
+
+    public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleUpdateIn updatedUserRoleDetails)
     {
-        UserId = userDetails.UserId,
-        Username = userDetails.User.UserName,
-        PasswordHash = userDetails.User.PasswordHash,
-        RoleId = userDetails.RoleId,
-        RoleName = userDetails.Role.RoleName // Ensure that RoleName is set correctly
-    };
+        if (updatedUserRoleDetails is null)
+            return new(null, "Update details inputs are empty", 400, false);
 
-    return new AppResponse<UsersRolesOut>(result);
-}
+        var role = await _unitOfWork.RolesRepository.GetRoleById(updatedUserRoleDetails.RoleId);
+        if (role == null)
+            return new(null, "Invalid role", 404, false);
 
-public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleIn updatedUserRoleDetails)
-{
-    if (updatedUserRoleDetails is null)
-        return new(null, "Update details inputs are empty", 400, false);
+        var user = await _unitOfWork.UserRepository.GetUserByIdRepository(updatedUserRoleDetails.UserId);
+        if (user == null)
+            return new(null, "Invalid user", 404, false);
 
-    var role = await _unitOfWork.RolesRepository.GetRoleById(updatedUserRoleDetails.RoleId);
-    if (role == null)
-        return new(null, "Invalid role", 404, false);
+        // Update user fields
+        user.UserName = updatedUserRoleDetails.Username;
+        user.PasswordHash = PasswordHasher.HashPassword(updatedUserRoleDetails.PasswordHash);
 
-    var user = await _unitOfWork.UserRepository.GetUserByIdRepository(updatedUserRoleDetails.UserId);
-    if (user == null)
-        return new(null, "Invalid user", 404, false);
 
-    // Update user fields
-    user.UserName = updatedUserRoleDetails.Username;
-    user.PasswordHash = updatedUserRoleDetails.PasswordHash;
+        var updated = new UsersRoles
+        {
+            UserId = user.UserId,
+            User = user,
+            RoleId = role.RolesId,
+            Role = role,
+        };
 
-    // Update relationship
-    var updated = new UsersRoles
-    {
-        UserId = user.UserId,
-        User = user,
-        RoleId = role.RolesId,
-        Role = role,
-    };
+        // Save updates
+        await _unitOfWork.UserRoleRepository.UpdateUsersRolesRepository(updated);
+        await _unitOfWork.Complete();
 
-    // Save updates
-    await _unitOfWork.UserRoleRepository.UpdateUsersRolesRepository(updated);
-    await _unitOfWork.Complete();
-
-    return new(new UsersRolesOut
-    {
-        UserId = user.UserId,
-        Username = user.UserName,
-        PasswordHash = user.PasswordHash,
-        RoleId = role.RolesId,
-        RoleName = role.RoleName
-    });
-}
+        return new(new UsersRolesOut
+        {
+            UserId = user.UserId,
+            Username = user.UserName,
+            RoleId = role.RolesId,
+            RoleName = role.RoleName
+        });
+    }
 
 
 
@@ -116,25 +115,25 @@ public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleIn u
             : new(new UsersRolesOut
             {
                 UserId = userRole.UserId,
-                Username = userRole.User!.UserName,
-                PasswordHash = userRole.User.PasswordHash,
+                Username = userRole.User.UserName,
                 RoleId = userRole.RoleId,
-                RoleName = userRole.Role!.RoleName
+                RoleName = userRole.Role.RoleName
             });
     }
 
     public async Task<AppResponse<List<UsersRolesOut>>> GetAllUserRolesService()
     {
         var users = await _unitOfWork.UserRoleRepository.GetAllUserRolesRepository();
-        if (users is null || !users.Any())
+        if (users is null || users.Count == 0)
             return new(null, "No user roles found", 404, false);
 
         var result = users.Select(u => new UsersRolesOut
         {
             UserId = u.UserId,
-            Username = u.User!.UserName,
+            Username = u.User.UserName,
+            Email = u.User.Email,
             RoleId = u.RoleId,
-            RoleName = u.Role!.RoleName
+            RoleName = u.Role.RoleName
         }).ToList();
 
         return new(result);
@@ -179,9 +178,9 @@ public async Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleIn u
         return new(new UserRoleDeleteOut
         {
             UserId = userId,
-            Username = userRole.User!.UserName,
+            Username = userRole.User.UserName,
             RoleId = roleId,
-            RoleName = userRole.Role!.RoleName
+            RoleName = userRole.Role.RoleName
         });
     }
 }

@@ -10,7 +10,9 @@ public class UserRoleRepository(AppDbContext context) : IUserRoleRepository
     private readonly AppDbContext _context = context;
     public async Task<UsersRoles> AddUsersRolesRepository(UsersRoles user)
     {
-        if(user == null) throw new Exception("Couldnt add " + user + " in database");
+        if (user == null)
+            throw new ArgumentNullException(nameof(user), "User-role association cannot be null.");
+
         await _context.UsersRoles.AddAsync(user);
         return user;
     }
@@ -19,7 +21,7 @@ public class UserRoleRepository(AppDbContext context) : IUserRoleRepository
     {
         if(user == null) throw new Exception("Couldnt delete " + user + " from database, Not found");
         var users = await _context.UsersRoles.FirstOrDefaultAsync(u => u.UserId == user.UserId) 
-                                             ?? throw new Exception("Failed to delete " + user.User!.UserName);
+                                             ?? throw new ArgumentException("Failed to delete " + user.User.UserName);
         _context.UsersRoles.Remove(users);
         return users;
     }

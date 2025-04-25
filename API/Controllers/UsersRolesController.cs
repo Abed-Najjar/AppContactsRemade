@@ -19,7 +19,7 @@ namespace API.Controllers
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<AppResponse<UsersRolesOut>>> UpdateUserRole([FromBody] UserRoleIn updatedUserRole)
+    public async Task<ActionResult<AppResponse<UsersRolesOut>>> UpdateUserRole([FromBody] UserRoleUpdateIn updatedUserRole)
     {
         return await _userRoleService.UpdateUserRoleService(updatedUserRole);
     }

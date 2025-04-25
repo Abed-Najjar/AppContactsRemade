@@ -2,7 +2,6 @@ using API.DTOs.UsersDtos;
 using API.Models;
 using API.Response;
 using API.Services.HashingServices;
-using API.UoW;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Services.userServices

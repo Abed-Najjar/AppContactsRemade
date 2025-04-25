@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250424095254_ConfiguredPrimaryKeys")]
-    partial class ConfiguredPrimaryKeys
+    [Migration("20250425194623_Test1")]
+    partial class Test1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,22 +59,18 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("RolesId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("UserId");
-
-                    b.HasIndex("RolesId");
 
                     b.ToTable("Users");
                 });
@@ -94,25 +90,18 @@ namespace API.Migrations
                     b.ToTable("UsersRoles");
                 });
 
-            modelBuilder.Entity("API.Models.Users", b =>
-                {
-                    b.HasOne("API.Models.Roles", null)
-                        .WithMany("Users")
-                        .HasForeignKey("RolesId");
-                });
-
             modelBuilder.Entity("API.Models.UsersRoles", b =>
                 {
                     b.HasOne("API.Models.Roles", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("API.Models.Users", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");
@@ -123,8 +112,6 @@ namespace API.Migrations
             modelBuilder.Entity("API.Models.Roles", b =>
                 {
                     b.Navigation("UserRoles");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("API.Models.Users", b =>

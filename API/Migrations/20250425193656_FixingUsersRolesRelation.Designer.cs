@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250423225312_AddUserRolesManyToMany")]
-    partial class AddUserRolesManyToMany
+    [Migration("20250425193656_FixingUsersRolesRelation")]
+    partial class FixingUsersRolesRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,7 +39,7 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Roles", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("RolesId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -47,34 +47,30 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("RolesId");
 
                     b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("API.Models.Users", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("RolesId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("RolesId");
+                    b.HasKey("UserId");
 
                     b.ToTable("Users");
                 });
@@ -94,25 +90,18 @@ namespace API.Migrations
                     b.ToTable("UsersRoles");
                 });
 
-            modelBuilder.Entity("API.Models.Users", b =>
-                {
-                    b.HasOne("API.Models.Roles", null)
-                        .WithMany("Users")
-                        .HasForeignKey("RolesId");
-                });
-
             modelBuilder.Entity("API.Models.UsersRoles", b =>
                 {
                     b.HasOne("API.Models.Roles", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("API.Models.Users", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");
@@ -123,8 +112,6 @@ namespace API.Migrations
             modelBuilder.Entity("API.Models.Roles", b =>
                 {
                     b.Navigation("UserRoles");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("API.Models.Users", b =>

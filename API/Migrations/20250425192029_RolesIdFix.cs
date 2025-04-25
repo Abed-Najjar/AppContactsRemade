@@ -5,18 +5,13 @@
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class ConfiguredPrimaryKeys : Migration
+    public partial class RolesIdFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Id",
-                table: "Users",
-                newName: "UserId");
-
-            migrationBuilder.RenameColumn(
-                name: "Id",
+                name: "RoleId",
                 table: "Roles",
                 newName: "RolesId");
         }
@@ -25,14 +20,9 @@ namespace API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "Users",
-                newName: "Id");
-
-            migrationBuilder.RenameColumn(
                 name: "RolesId",
                 table: "Roles",
-                newName: "Id");
+                newName: "RoleId");
         }
     }
 }

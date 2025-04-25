@@ -12,6 +12,7 @@ namespace API.Repositories.UsersRepos
         Task<List<Users>> GetAllUsersRepository();
         Task<Users> GetUserByIdRepository(int id);
         Task<Users> GetUserByNameRepository(string username);
+        Task<Users> GetUserByEmail(string email);
         Task<Users> UpdateUserRepository(int id, Users updatedUserDetails);
         Task<Users> DeleteUserRepository(int id);
     }

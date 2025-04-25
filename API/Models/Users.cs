@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace API.Models
 {
-    public class Users
-    {
-        public int UserId{ get; set; }
-        public string UserName { get; set; }  = null!;
-        public string PasswordHash { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public ICollection<UsersRoles>? UserRoles { get; set; }
-    }
+public class Users
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
+    public ICollection<UsersRoles> UserRoles { get; set; } = new List<UsersRoles>();
+}
 }
