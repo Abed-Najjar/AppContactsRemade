@@ -9,6 +9,8 @@ public class UserRoleIn
     public int UserId { get; set; }
     public required string Username { get; set; }
     [Required]
+    public required string Email { get; set; }
+    [Required]
     public required string PasswordHash { get; set; }
     [Required]
     public required int RoleId { get; set; }

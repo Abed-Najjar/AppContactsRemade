@@ -24,6 +24,7 @@ public async Task<AppResponse<UsersRolesOut>> AddUserRoleService(UserRoleIn user
         User = new Users
         {
             UserName = userRole.Username,
+            Email = userRole.Email,
             PasswordHash = userRole.PasswordHash
         },
         Role = role // Assign the existing role directly
