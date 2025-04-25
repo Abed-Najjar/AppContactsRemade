@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aWmQLWuZzRo=",
+  "dgSpecHash": "iVrXzUXJfz8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\x_sly\\NetCoreProjectPractice\\AppContactsRemade\\api\\API.csproj",
+  "projectFilePath": "C:\\Users\\x_sly\\NetCoreProjectPractice\\AppContactsRemade\\API\\API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\x_sly\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\x_sly\\.nuget\\packages\\isopoh.cryptography.argon2\\2.0.0\\isopoh.cryptography.argon2.2.0.0.nupkg.sha512",
