@@ -10,4 +10,7 @@ public interface IUserRoleService
     Task<AppResponse<UsersRolesOut>> UpdateUserRoleService(UserRoleUpdateIn updatedUserRoleDetails);
     Task<AppResponse<UserRoleDeleteOut>> DeleteUserRoleService(UserRoleDeleteIn userRole);
     Task<AppResponse<UsersRolesOut>> GetUserRoleService(int userId, int roleId);
+    Task<AppResponse<UsersRolesOut>> AssignRoleToUserAsync(int userId, int roleId);
+    Task<AppResponse<UserRoleDeleteOut>> RemoveRoleFromUserAsync(int userId, int roleId);
+    Task<AppResponse<string>> LoginAsync(UserRoleLoginDto loginDto);
 }

@@ -14,6 +14,10 @@ namespace API.Services.userServices
             if(userDetails == null)
                 return new AppResponse<UsersOut>(null, "Your input fields are empty", 404, false);
             
+            // Check if email already exists
+            var existingEmail = await UnitOfWork.UserRepository.CheckEmailUnique(userDetails.Email);
+            if (existingEmail != null) return new AppResponse<UsersOut>(null, "Email already exists", 400, false);
+
             userDetails.Username = userDetails.Username.ToLower();
             
             var user = new Users
@@ -31,7 +35,6 @@ namespace API.Services.userServices
                 Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email,
-                Passwordhash = user.PasswordHash
             };
 
             return new AppResponse<UsersOut>(result);
@@ -47,7 +50,6 @@ namespace API.Services.userServices
                 Userid = u.UserId,
                 Username = u.UserName,
                 Email = u.Email!,
-                Passwordhash = u.PasswordHash
             }).ToList();
 
             return new AppResponse<List<UsersOut>>(resultDto);
@@ -63,7 +65,6 @@ namespace API.Services.userServices
                 Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email!,
-                Passwordhash = user.PasswordHash
             };
 
             return new AppResponse<UsersOut>(result);
@@ -80,7 +81,6 @@ namespace API.Services.userServices
                 Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email!,
-                Passwordhash = user.PasswordHash
             };
 
             return new AppResponse<UsersOut>(result);
@@ -121,10 +121,27 @@ namespace API.Services.userServices
                 Userid = user.UserId,
                 Username = user.UserName,
                 Email = user.Email,
-                Passwordhash = user.PasswordHash
             };
 
             return new AppResponse<UsersOut>(result ,"Updated " + user.UserName + " successfully", 200, true);
+        }
+
+        public async Task<AppResponse<UsersOut>> LoginService(loginIn userDetails)
+        {
+            if(userDetails == null)
+                return new AppResponse<UsersOut>(null, "Your input fields are empty", 404, false);
+            
+            var user = await UnitOfWork.UserRepository.LoginRepository(userDetails.Username.ToLower(), userDetails.Passwordhash);
+            if(user == null) return new AppResponse<UsersOut>(null, "Cant login, User not found", 404, false);
+
+            var result = new UsersOut
+            {
+                Userid = user.UserId,
+                Username = user.UserName,
+                Email = user.Email!,
+            };
+
+            return new AppResponse<UsersOut>(result,"Logged in successfully", 200, true);
         }
     }
 }

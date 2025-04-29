@@ -1,3 +1,4 @@
+using System.Text;
 using API.Data;
 using API.Repositories.ContactsRepos;
 using API.Repositories.RolesRepos;
@@ -6,10 +7,14 @@ using API.Repositories.UsersRepos;
 using API.Services.contactServices;
 using API.Services.ContactServs;
 using API.Services.roleService;
+using API.Services.tokenService;
 using API.Services.userRoleService;
 using API.Services.userServices;
 using API.UoW;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace API.Extensions
 {
@@ -44,6 +49,61 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
+             // ✅ 2. Configure JWT Authentication
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
+                };
+            });
+
+
+            services.AddSwaggerGen(c =>
+            {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+            // Add JWT Authentication support in Swagger
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+            
+            // Add this line to your service registrations
+            services.AddScoped<ITokenService, TokenService>();
 
             return services;
         }

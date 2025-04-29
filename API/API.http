@@ -1,6 +1,25 @@
 @API_HostAddress = http://localhost:5169
 
-GET {{API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a new user with role
+POST {{API_HostAddress}}/api/UsersRoles/register
+Content-Type: application/json
 
-###
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "passwordHash": "test123",
+    "roleId": 1
+}
+
+### Login with the registered user
+POST {{API_HostAddress}}/api/UsersRoles/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "test123"
+}
+
+### Test protected endpoint (requires authentication)
+GET {{API_HostAddress}}/api/UsersRoles/get-all
+Authorization: Bearer your_token_here

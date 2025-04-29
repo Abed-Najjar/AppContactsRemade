@@ -11,7 +11,7 @@ public class UserRoleIn
     [Required][IsValidEmailAddress]
     public required string Email { get; set; }
     [Required]
-    public required string PasswordHash { get; set; }
+    public required string Password { get; set; }
     [Required]
     public required int RoleId { get; set; }
 }

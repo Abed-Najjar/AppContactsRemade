@@ -10,4 +10,5 @@ public interface IUserRoleRepository
     Task<UsersRoles> AddUsersRolesRepository(UsersRoles user);
     Task<UsersRoles> UpdateUsersRolesRepository(UsersRoles updatedUsersRolesDetails);
     Task<UsersRoles> DeleteUsersRolesRepository(UsersRoles user);
+    Task<UsersRoles?> GetUserByUsernameWithRole(string username);
 }

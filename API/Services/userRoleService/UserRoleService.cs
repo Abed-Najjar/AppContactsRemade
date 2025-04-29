@@ -1,17 +1,27 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims; // Ensure this namespace is used for ClaimTypes
+using System.Text;
+using System.IO; // Add this only if needed elsewhere, but avoid conflicts
+using Microsoft.IdentityModel.Tokens;
+using API.Response;
 using API.DTOs.UserRoleDtos;
 using API.Models;
-using API.Response;
 using API.Services.HashingServices;
+using API.Services.tokenService;
 
 namespace API.Services.userRoleService;
 
-public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
+public class UserRoleService(IUnitOfWork unitOfWork, IConfiguration configuration, ITokenService tokenService) : IUserRoleService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IConfiguration _configuration = configuration;
 
     public async Task<AppResponse<UsersRolesOut>> AddUserRoleService(UserRoleIn userRole)
     {
         if (userRole == null) return new AppResponse<UsersRolesOut>(null, "Your input fields are empty", 404, false);
+
+        var existingEmail = await _unitOfWork.UserRepository.CheckEmailUnique(userRole.Email);
+        if (existingEmail != null) return new AppResponse<UsersRolesOut>(null, "Email already exists", 400, false);
 
         // Fetch the existing role from the database
         var role = await _unitOfWork.RolesRepository.GetRoleById(userRole.RoleId);
@@ -24,7 +34,7 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
             {
                 UserName = userRole.Username,
                 Email = userRole.Email,
-                PasswordHash = PasswordHasher.HashPassword(userRole.PasswordHash)
+                PasswordHash = PasswordHasher.HashPassword(userRole.Password)
             },
             
             RoleId = role.RolesId
@@ -79,6 +89,7 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
         {
             UserId = user.UserId,
             Username = user.UserName,
+            Email = user.Email,
             RoleId = role.RolesId,
             RoleName = role.RoleName
         });
@@ -101,9 +112,9 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
         return new(new UserRoleDeleteOut
         {
             UserId = deleted.UserId,
-            Username = deleted.User!.UserName,
+            Username = deleted.User.UserName,
             RoleId = deleted.RoleId,
-            RoleName = deleted.Role!.RoleName
+            RoleName = deleted.Role.RoleName
         });
     }
 
@@ -116,6 +127,7 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
             {
                 UserId = userRole.UserId,
                 Username = userRole.User.UserName,
+                Email = userRole.User.Email,
                 RoleId = userRole.RoleId,
                 RoleName = userRole.Role.RoleName
             });
@@ -141,26 +153,24 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
 
     public async Task<AppResponse<UsersRolesOut>> AssignRoleToUserAsync(int userId, int roleId)
     {
+        var userRole = await _unitOfWork.UserRoleRepository.GetUserRoleRepository(userId, roleId);
+        if (userRole != null)
+            return new(null, "Role already assigned", 400, false);
+
         var user = await _unitOfWork.UserRepository.GetUserByIdRepository(userId);
-        if (user is null)
-            return new(null, "User not found", 404, false);
-
         var role = await _unitOfWork.RolesRepository.GetRoleById(roleId);
-        if (role is null)
-            return new(null, "Role not found", 404, false);
+        if (user == null || role == null)
+            return new(null, "User or Role not found", 404, false);
 
-        var alreadyAssigned = await _unitOfWork.UserRoleRepository.GetUserRoleRepository(userId, roleId);
-        if (alreadyAssigned != null)
-            return new(null, "Role already assigned to user", 400, false);
-
-        var userRole = new UsersRoles { UserId = userId, RoleId = roleId };
-        await _unitOfWork.UserRoleRepository.AddUsersRolesRepository(userRole);
+        var newUserRole = new UsersRoles { UserId = userId, RoleId = roleId };
+        await _unitOfWork.UserRoleRepository.AddUsersRolesRepository(newUserRole);
         await _unitOfWork.Complete();
 
         return new(new UsersRolesOut
         {
             UserId = userId,
             Username = user.UserName,
+            Email = user.Email,
             RoleId = roleId,
             RoleName = role.RoleName
         });
@@ -179,8 +189,23 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
         {
             UserId = userId,
             Username = userRole.User.UserName,
+            Email = userRole.User.Email,
             RoleId = roleId,
             RoleName = userRole.Role.RoleName
         });
     }
+
+    public async Task<AppResponse<string>> LoginAsync(UserRoleLoginDto loginDto)
+    {
+        var userRole = await _unitOfWork.UserRoleRepository.GetUserByUsernameWithRole(loginDto.Username);
+        
+        if (userRole == null)
+            return new AppResponse<string>("User not found", 404, false);
+
+        if (!PasswordHasher.VerifyPassword(userRole.User.PasswordHash, loginDto.Password))
+            return new AppResponse<string>(null,"Wrong password", 401, false);
+
+        return new AppResponse<string>(tokenService.CreateToken(userRole), "Login successful", 200, true);
+    }
+
 }

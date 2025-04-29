@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add execution time middleware
+app.UseExecutionTime();
+
+// Add authentication & authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {

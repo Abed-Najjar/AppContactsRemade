@@ -11,6 +11,7 @@ namespace API.Services.userServices
     public interface IUserService
     {
         Task<AppResponse<UsersOut>> CreateUserService(UserIn userDetails);
+        Task<AppResponse<UsersOut>> LoginService(loginIn userDetails);
         Task<AppResponse<List<UsersOut>>> GetAllService();
         Task<AppResponse<UsersOut>> GetUserService(int id);
         Task<AppResponse<UsersOut>> GetByUsernameService(string username);
