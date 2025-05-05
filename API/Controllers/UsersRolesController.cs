@@ -3,15 +3,22 @@ using API.Response;
 using API.Services.userRoleService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting; // Add this using directive
 
 namespace API.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")] // Existing authorization
+    //[EnableRateLimiting("fixed")] // Apply the 'fixed' policy defined in Program.cs
     [ApiController]
     [Route("api/[controller]")] 
-    public class UsersRolesController(IUserRoleService userRoleService) : ControllerBase
+    public class UsersRolesController : ControllerBase
     {
-        private readonly IUserRoleService _userRoleService = userRoleService;
+        private readonly IUserRoleService _userRoleService;
+
+        public UsersRolesController(IUserRoleService userRoleService)
+        {
+            _userRoleService = userRoleService;
+        }
 
         [AllowAnonymous]
         [HttpPost("register")]

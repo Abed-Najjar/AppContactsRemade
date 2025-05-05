@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Extensions
 {
@@ -48,6 +51,25 @@ public static class ServiceCollectionExtensions
             //UoW
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Add Rate Limiter services
+            services.AddRateLimiter(options =>
+            {
+                options.AddFixedWindowLimiter(policyName: "fixed", opt =>
+                {
+                    opt.PermitLimit = 5; // Max 5 requests
+                    opt.Window = TimeSpan.FromSeconds(30); // per 30 seconds
+                    opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    opt.QueueLimit = 0; // Set queue limit to 0 for immediate rejection
+                });
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                // Simplified OnRejected handler
+                options.OnRejected = (context, cancellationToken) =>
+                {
+                    // We will rely on RejectionStatusCode to send the 429.
+                    return new ValueTask();
+                };
+            });
 
              // ✅ 2. Configure JWT Authentication
             services.AddAuthentication(options =>

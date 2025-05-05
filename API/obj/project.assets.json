@@ -3964,11 +3964,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade\\api\\API.csproj",
+      "projectUniqueName": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade-1\\API\\API.csproj",
       "projectName": "API",
-      "projectPath": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade\\api\\API.csproj",
+      "projectPath": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade-1\\API\\API.csproj",
       "packagesPath": "C:\\Users\\Abdulrahman Al Najja\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade\\api\\obj\\",
+      "outputPath": "C:\\Users\\Abdulrahman Al Najja\\Desktop\\.NET Projects\\AppContactsRemade-1\\API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
